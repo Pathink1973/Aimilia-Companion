@@ -3,7 +3,7 @@
 <h1 align="center">Aimilia · uma companheira digital para construir</h1>
 <p align="center">Voz, expressões e personalidade num pequeno ecrã circular.<br>Um projeto maker de <strong>Patrício Brito</strong>, construído sobre o XiaoZhi.</p>
 <p align="center"><a href="https://aimilia.vercel.app/">Website</a> · <a href="docs/03-instalacao.md">Construir passo a passo</a> · <a href="prompts/instalar-com-codex.md">Instalar com o Codex</a> · <a href="https://www.academiacria.pt/">Academia crIA</a></p>
-<p align="center"><img alt="Licença MIT" src="https://img.shields.io/badge/licen%C3%A7a-MIT-78d9fa?style=flat-square"> <img alt="ESP32-S3" src="https://img.shields.io/badge/hardware-ESP32--S3-24272c?style=flat-square"> <img alt="466 × 466 AMOLED" src="https://img.shields.io/badge/ecr%C3%A3-466_%C3%97_466_AMOLED-24272c?style=flat-square"> <img alt="Estado: maker experimental" src="https://img.shields.io/badge/estado-maker_experimental-ffad72?style=flat-square"></p>
+<p align="center"><a href="https://github.com/Pathink1973/Aimilia-Companion/actions/workflows/validate.yml"><img alt="Validação automática" src="https://github.com/Pathink1973/Aimilia-Companion/actions/workflows/validate.yml/badge.svg"></a> <img alt="Licença MIT" src="https://img.shields.io/badge/licen%C3%A7a-MIT-78d9fa?style=flat-square"> <img alt="ESP32-S3" src="https://img.shields.io/badge/hardware-ESP32--S3-24272c?style=flat-square"> <img alt="466 × 466 AMOLED" src="https://img.shields.io/badge/ecr%C3%A3-466_%C3%97_466_AMOLED-24272c?style=flat-square"> <img alt="Estado: maker experimental" src="https://img.shields.io/badge/estado-maker_experimental-ffad72?style=flat-square"></p>
 
 ## O que é a Aimilia?
 
