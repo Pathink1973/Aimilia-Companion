@@ -1,0 +1,13 @@
+name: Ideia de melhoria
+description: Propor uma melhoria focada e compatível com a placa.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Que necessidade resolve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta e como preservar áudio, privacidade e compatibilidade

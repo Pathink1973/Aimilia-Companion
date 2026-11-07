@@ -1,0 +1,31 @@
+name: Problema ou incompatibilidade
+description: Reportar uma falha reproduzível, sem dados privados.
+body:
+  - type: markdown
+    attributes:
+      value: Não anexes tokens, NVS, dumps, emails ou logs pessoais. Vulnerabilidades devem ser comunicadas pelo canal de segurança.
+  - type: input
+    id: board
+    attributes:
+      label: Placa exata, SDK e commit Aimilia
+      placeholder: Waveshare 1.75C / ESP-IDF 6.0.1 / commit
+    validations:
+      required: true
+  - type: dropdown
+    id: layout
+    attributes:
+      label: Instalação
+      options:
+        - Standalone
+        - Dual boot adaptado
+        - Ainda sem gravar
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir, resultado esperado e observado
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: O que foi testado e excerto redigido do erro

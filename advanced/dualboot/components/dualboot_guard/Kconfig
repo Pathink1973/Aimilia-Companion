@@ -1,0 +1,5 @@
+menu "Waveshare dual boot"
+config DUALBOOT_XIAO_NVS
+    bool "Use XiaoZhi private settings partition"
+    default n
+endmenu

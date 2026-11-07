@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-07",
+  "upstream_revision": "cdc74a0c1467ea517b37b44a8d56d517c715f6c8",
+  "sdk": "ESP-IDF 6.0.1",
+  "profile": "standalone 1.75C",
+  "build": "passed",
+  "application_bytes": 3029888,
+  "application_partition_bytes": 4128768,
+  "application_sha256": "cfbd2e5959961b2536733ae8d1bc390ae8784821c180edd0602eded99983252d",
+  "host_python_tests": 3,
+  "host_cpp_checks": [
+    "battery",
+    "formas (216 cases)",
+    "kubi_animation",
+    "mouth_audio"
+  ],
+  "mcp_offline_tests": 27,
+  "physical_flash_performed": false,
+  "new_standalone_hardware_validation": false,
+  "private_credentials_distributed": false,
+  "wrangler": "4.158.0",
+  "mcp_worker_dry_run": "passed",
+  "npm_audit_known_vulnerabilities": 0
+}

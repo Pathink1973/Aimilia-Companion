@@ -1,0 +1,14 @@
+# Shared 32 MiB layout. Preserve every existing Muse partition and its offset.
+# Name, Type, SubType, Offset, Size, Flags
+nvs, data, nvs, 0x11000, 0xC000,
+otadata, data, ota, 0x1D000, 0x2000,
+phy_init, data, phy, 0x1F000, 0x1000,
+ota_0, app, ota_0, 0x20000, 4M,
+ota_1, app, ota_1, 0x420000, 4M,
+prod_data, data, 0x40, 0x820000, 0x1000,
+prod_bak, data, 0x41, 0x821000, 0x1000,
+xiao_nvs, data, nvs, 0x830000, 0xB0000,
+nvsfactory, data, nvs, 0x8E0000, 0x20000,
+xiaozhi, app, ota_2, 0x900000, 3M,
+selector, app, factory, 0xC00000, 1M,
+assets, data, spiffs, 0xD00000, 3M,

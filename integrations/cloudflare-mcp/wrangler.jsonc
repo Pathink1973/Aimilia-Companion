@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aimilia-mcp",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-25",
+  "workers_dev": true,
+  "preview_urls": false,
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "observability": { "enabled": false },
+  "durable_objects": { "bindings": [{ "name": "BRIDGE", "class_name": "AimiliaBridge" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AimiliaBridge"] }]
+}
