@@ -1,10 +1,22 @@
 #pragma once
+#include <atomic>
 #include <cctype>
 #include <ctime>
 #include <mutex>
 #include "board.h"
 #include "http.h"
 #include "mcp_server.h"
+
+// Current weather is inferred from the network IP, not GPS.
+inline std::atomic<int> valenca_temperature_tenths{0};
+inline std::atomic<int> valenca_weather_code{-1};
+inline std::atomic<int64_t> valenca_updated_us{0};
+inline std::mutex weather_location_mutex;
+inline std::string weather_location_name;
+inline std::string WeatherLocationName() {
+    std::lock_guard<std::mutex> lock(weather_location_mutex);
+    return weather_location_name;
+}
 
 class PortugalWeather {
     friend struct PortugalWeatherTest;
@@ -136,6 +148,64 @@ class PortugalWeather {
                 return "Sem informação";
         }
     }
+    bool FetchWeatherJson(const std::string& url, std::string& body) {
+        auto net = Board::GetInstance().GetNetwork();
+        if (!net) return false;
+        auto http = net->CreateHttp(4);
+        if (!http) return false;
+        http->SetTimeout(6000);
+        if (!http->Open("GET", url)) return false;
+        auto status = http->GetStatusCode();
+        if (!status || *status != 200) { http->Close(); return false; }
+        char chunk[512];
+        bool complete = false;
+        int64_t deadline = esp_timer_get_time() + 12000000;
+        while (esp_timer_get_time() < deadline) {
+            auto n = http->Read(chunk, sizeof(chunk));
+            if (!n) break;
+            if (*n == 0) { complete = true; break; }
+            body.append(chunk, *n);
+            if (body.size() > 8192) break;
+        }
+        http->Close();
+        return complete && body.size() <= 8192;
+    }
+    void RefreshValenca() {
+        // Network-based geolocation is approximate, especially with mobile hotspots.
+        std::string location_body;
+        if (!FetchWeatherJson("https://ipwho.is/?fields=success,city,latitude,longitude", location_body)) {
+            ESP_LOGW("Weather", "Location request failed"); return;
+        }
+        CJsonUniquePtr location(cJSON_Parse(location_body.c_str()));
+        auto success = location ? cJSON_GetObjectItem(location.get(), "success") : nullptr;
+        auto lat = location ? cJSON_GetObjectItem(location.get(), "latitude") : nullptr;
+        auto lon = location ? cJSON_GetObjectItem(location.get(), "longitude") : nullptr;
+        auto city = location ? cJSON_GetObjectItem(location.get(), "city") : nullptr;
+        if (!cJSON_IsTrue(success) || !cJSON_IsNumber(lat) || !cJSON_IsNumber(lon) ||
+            lat->valuedouble < -90 || lat->valuedouble > 90 || lon->valuedouble < -180 || lon->valuedouble > 180) {
+            ESP_LOGW("Weather", "Location response unavailable"); return;
+        }
+        char url[256];
+        snprintf(url, sizeof(url), "https://api.open-meteo.com/v1/forecast?latitude=%.5f&longitude=%.5f&current=temperature_2m,weather_code&timezone=auto", lat->valuedouble, lon->valuedouble);
+        std::string body;
+        if (!FetchWeatherJson(url, body)) { ESP_LOGW("Weather", "Forecast request failed"); return; }
+        CJsonUniquePtr json(cJSON_Parse(body.c_str()));
+        auto current = json ? cJSON_GetObjectItem(json.get(), "current") : nullptr;
+        auto temperature = current ? cJSON_GetObjectItem(current, "temperature_2m") : nullptr;
+        auto code = current ? cJSON_GetObjectItem(current, "weather_code") : nullptr;
+        if (!cJSON_IsNumber(temperature) || temperature->valuedouble < -50 || temperature->valuedouble > 60 || !cJSON_IsNumber(code)) {
+            ESP_LOGW("Weather", "Forecast response invalid"); return;
+        }
+        {
+            std::lock_guard<std::mutex> lock(weather_location_mutex);
+            weather_location_name = cJSON_IsString(city) && city->valuestring ? city->valuestring : "Localizacao aproximada";
+            if (weather_location_name.size() > 50) weather_location_name.resize(50);
+        }
+        valenca_weather_code.store(code->valueint);
+        valenca_temperature_tenths.store(static_cast<int>(temperature->valuedouble * 10));
+        valenca_updated_us.store(esp_timer_get_time());
+        ESP_LOGI("Weather", "Forecast updated");
+    }
     void Refresh(int day) {
         auto http = Board::GetInstance().GetNetwork()->CreateHttp(4);
         if (!http)
@@ -189,12 +259,13 @@ public:
                 auto self = static_cast<PortugalWeather*>(arg);
                 vTaskDelay(pdMS_TO_TICKS(15000));
                 while (true) {
+                    self->RefreshValenca();
                     for (int i = 0; i < 3; ++i)
                         self->Refresh(i);
                     bool ready;
                     {
                         std::lock_guard<std::mutex> lock(self->mutex_);
-                        ready = self->updated_[0] != 0;
+                        ready = self->updated_[0] != 0 && valenca_updated_us.load() != 0;
                     }
                     vTaskDelay(pdMS_TO_TICKS(ready ? 900000 : 60000));
                 }

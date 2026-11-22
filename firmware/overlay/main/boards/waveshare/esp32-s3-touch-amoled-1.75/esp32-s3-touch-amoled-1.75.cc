@@ -151,6 +151,42 @@ class CustomLcdDisplay : public SpiLcdDisplay {
 #include "formas_skin.inc"
 
     void AnimateFace() {
+        if (menu_open_ && menu_page_ == 10 && (!menu_home_ || lv_obj_has_flag(menu_home_, LV_OBJ_FLAG_HIDDEN)) && weather_displayed_update_ != valenca_updated_us.load()) {
+            RenderMenu();
+        }
+        if (menu_open_ && menu_page_ == 8 && clock_segments_[0][0] && lv_tick_get() - clock_last_update_ >= 1000) {
+            clock_last_update_ = lv_tick_get();
+            time_t now = time(nullptr);
+            struct tm local = {};
+            localtime_r(&now, &local);
+            static constexpr uint8_t digits[] = {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};
+            int values[] = {local.tm_hour/10,local.tm_hour%10,local.tm_min/10,local.tm_min%10};
+            for (int digit=0; digit<4; ++digit) {
+                uint8_t mask = local.tm_year >= 125 ? digits[values[digit]] : 0x40;
+                for (int segment=0; segment<7; ++segment) {
+                    bool on = mask & (1<<segment);
+                    lv_obj_set_style_bg_opa(clock_segments_[digit][segment], on ? LV_OPA_COVER : LV_OPA_20, 0);
+                    lv_obj_set_style_shadow_opa(clock_segments_[digit][segment], on ? LV_OPA_50 : LV_OPA_TRANSP, 0);
+                }
+            }
+        }
+        if (menu_open_ && menu_page_ == 9 && analog_hour_ && analog_minute_ && lv_tick_get() - clock_last_update_ >= 1000) {
+            clock_last_update_ = lv_tick_get();
+            time_t now = time(nullptr);
+            struct tm local = {};
+            localtime_r(&now, &local);
+            if (local.tm_year >= 125) {
+                constexpr float pi = 3.14159265f;
+                float minute = (local.tm_min + local.tm_sec / 60.0f) * pi / 30.0f;
+                float hour = (local.tm_hour % 12 + local.tm_min / 60.0f) * pi / 6.0f;
+                analog_hour_points_[0] = {165, 120};
+                analog_hour_points_[1] = {static_cast<lv_value_precise_t>(165 + sinf(hour)*36), static_cast<lv_value_precise_t>(120 - cosf(hour)*36)};
+                analog_minute_points_[0] = {165, 120};
+                analog_minute_points_[1] = {static_cast<lv_value_precise_t>(165 + sinf(minute)*56), static_cast<lv_value_precise_t>(120 - cosf(minute)*56)};
+                lv_line_set_points(analog_hour_, analog_hour_points_, 2);
+                lv_line_set_points(analog_minute_, analog_minute_points_, 2);
+            }
+        }
         if (menu_open_ && menu_page_ == 7 && lv_tick_get() - battery_last_ > 5000)
             RequestBattery();
         auto state = Application::GetInstance().GetDeviceState();
@@ -283,6 +319,11 @@ class CustomLcdDisplay : public SpiLcdDisplay {
     }
 
 public:
+    void OpenSettingsFromButton() {
+        DisplayLockGuard lock(this);
+        OpenMenu();
+    }
+
     bool ShowExpression(const std::string& name, int seconds) {
         if (!expressive_eyes::IsCanonical(name))
             return false;
@@ -596,12 +637,11 @@ private:
                 esp_restart();
             });
         });
-#elif CONFIG_USE_DEVICE_AEC
+#else
         boot_button_.OnDoubleClick([this]() {
-            auto& app = Application::GetInstance();
-            if (app.GetDeviceState() == kDeviceStateIdle) {
-                app.SetAecMode(app.GetAecMode() == kAecOff ? kAecOnDeviceSide : kAecOff);
-            }
+            Application::GetInstance().Schedule([this]() {
+                static_cast<CustomLcdDisplay*>(GetDisplay())->OpenSettingsFromButton();
+            });
         });
 #endif
     }

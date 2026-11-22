@@ -29,3 +29,7 @@ O protótipo privado já foi usado fisicamente pelo autor com voz, expressões, 
 - A sincronização da boca é baseada no sinal de áudio; não é reconhecimento de fonemas.
 
 Não disponibilizamos binários ou um rótulo de «release estável para qualquer placa» sem ensaio físico específico. Usa a versão fonte, preserva um backup e reporta resultados reproduzíveis.
+
+## Atualização de 22 de novembro de 2026
+
+O firmware standalone foi gravado na placa 1.75C do autor; a gravação foi verificada e o utilizador confirmou menu, relógios e apresentação meteorológica. A localização meteorológica é aproximada por IP (IPWhois) e a previsão é obtida na Open-Meteo. Os testes físicos são parciais: o instalador web, recuperação noutra placa e gravador persistente não foram validados. O hash atual consta de `validation.json`.

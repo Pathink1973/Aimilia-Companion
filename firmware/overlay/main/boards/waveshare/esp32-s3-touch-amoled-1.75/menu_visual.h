@@ -3,14 +3,16 @@
 #include "lvgl.h"
 // Shared by the board view and the host screenshot harness; no application state.
 static void aimilia_button_style(lv_obj_t* b) {
-    lv_obj_set_style_bg_color(b, lv_color_hex(0x195A80), 0);
+    lv_obj_set_style_bg_color(b, lv_color_hex(0x273A56), 0);
     lv_obj_set_style_bg_opa(b, LV_OPA_COVER, 0);
-    lv_obj_set_style_bg_grad_color(b, lv_color_hex(0x14354D), 0);
+    lv_obj_set_style_bg_grad_color(b, lv_color_hex(0x18263C), 0);
     lv_obj_set_style_bg_grad_dir(b, LV_GRAD_DIR_VER, 0);
     lv_obj_set_style_border_width(b, 1, 0);
-    lv_obj_set_style_border_color(b, lv_color_hex(0x368EB1), 0);
+    lv_obj_set_style_border_color(b, lv_color_hex(0x617EAA), 0);
     lv_obj_set_style_radius(b, 18, 0);
-    lv_obj_set_style_shadow_width(b, 0, 0);
+    lv_obj_set_style_shadow_width(b, 12, 0);
+    lv_obj_set_style_shadow_color(b, lv_color_hex(0x1A4068), 0);
+    lv_obj_set_style_shadow_opa(b, LV_OPA_30, 0);
     lv_obj_set_style_pad_all(b, 0, 0);
     lv_obj_set_style_text_color(b, lv_color_hex(0xF0FAFF), 0);
     lv_obj_set_style_bg_color(b, lv_color_hex(0x31516D), LV_STATE_PRESSED);
